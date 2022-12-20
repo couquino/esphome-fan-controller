@@ -1,69 +1,21 @@
 # ESPHome Fan Controller
+This repo gives you all the keys to build a quiet thermostat-controlled fan for cooling any enclosure (media console, DIY server cabinet...)
 
-This project describes how to build a quiet thermostat controlled fan for cooling your media console, cupboard or other enclosed area with Gaming Consoles (PS5) and Computers.
+The software is ESPHome and works well with Home Assistant. For hardware, I used an ESP8266 and Artic BioniX F140 140mm fans.
 
-The software is ESPHome and Home Assistant. The hardware is an ESP32 with a regular 12v 120mm Computer Fan (PWM) and a Temperature Sensor (DHT11).
+This project is based on [ESPHome Fan Controller](https://github.com/patrickcollins12/esphome-fan-controller)
 
-## Cost
-The electronic parts are $29 USD including the ESP32. Probably up to $40 once you add some mounting parts and a project box.
+## What do I need ?
+To build my DIY server cabinet thermostat-controlled fans, I used:
+- ESP8266 (Any board should be compatible)
+- LM2596 Buck Converter - to convert 12v down to 3.3v
+- 12v Power Adapter and 12v DC Female Jack
+- 12v PWM 4-pin Computer Fan - I picked some [BioniX F140](https://www.arctic.de/en/BioniX-F140/ACFAN00096A) from Arctic but you can use any 12V PWM-controllable fan
+- DHT 11 temperature and humidity sensor
 
-## Motivation
-My sons's Playstation 5 sits in our TV Console which runs hotter than Sol. Also in that Media Console is a Macmini, a Raspberry Pi and a few other devices. My wife likes to keep the door neat and closed, so it needs some cooling!
+I also hired someone to design a custom PCB with 3 fan headers and slots for each component, you can find it in /pcb folder and order it on JLCPCB for example.
 
-I previously had a thermostat which simply toggled the fan on or off if it got too hot. That didn't work for me. This is a smart thermostat which intelligently controls the 12v-fan speed in order to maintain a perfect temperature in your cabinet. It is important to maintain, say, 22% fan speed to keep a cupboard cool than to cycle the fan between 0% and 100% power constantly making wife-unfriendly noise. There is nothing worse than watching a movie and hearing the fan power on.
-
-!["closed cabinet"](images/fortnite.jpg)
-
-## Features
-The main features are:
-
-- the **fan dynamically adjusts** it's speed based on the temperature sensor using a Process Control mechanism called PID
-- **adjustable target temperature**. I currently target 30degC but maybe in winter I'll reduce it to 27.
-- uses ESP32's Wifi to connect to Home Assistant for control and reporting
-- the ESP32 is standalone and so the cooling function will continue to operate without Wifi. Doesn't need HomeAssistant or Wifi to operate. Wifi is only needed for setup, manual control and reporting.
-- **no screen** is needed on the device itself, all management is done via Home Assistant
-- my system uses two fans for extra cooling. Depending on how much air you need to draw through your enclosed space you could use 1 or 2 fans
-- it is easily extendable to control up to 10 separate enclosed spaces with separate temperature sensors as well. You're only limited by the Amps of your 12v Power Brick and the pins on your ESP32.
-- **no coding is needed**. Just some configuration in YAML files. In fact this repo only contains 1 file ``config-fan.yaml``.
-- **No resistors, capacitors or difficult soldering needed**. The fan and the temperature sensor plug straight onto the pins of the ESP32. Although I did mount mine on a perfboard for cleanliness and put it in a case.
-
-!["graphs"](images/demo.jpg)
-
-This is a screenshot from Home Assistant. I'll show you how to setup this dashboard.
-
-## Visuals
-!["inside cabinet"](images/inside.jpg)
-!["controller"](images/real1.jpg)
-!["fans"](images/real2.jpg)
-
-
-## Parts (~$29 USD)
-
-- **DHT11** - temperature and humidity sensor. I'm using the one on a board with 3-pins. Cost $1.50 USD<br><img src="images/dht-11.png" width="100">
-
-- **12v PWM 4-pin Computer Fan** - I'm using 2 x [120mm Corsair fans](https://www.corsair.com/us/en/Categories/Products/Fans/Magnetic-Levitation-Fans/ml-config/p/CO-9050039-WW). Any 12v PWM-controllable fan should work. Cost $8-$15 USD. I recommend getting high quality fans if you care about noise and need to move a lot of air<br><img src="images/corsair-fan.png" width="100">
-
-- **12v Power Adapter** - 1A or 2A should be fine depending on your fan's current draw. Cost $7 <br><img src="images/12v%20power%20supply.jpeg" width="100"> 
-
-- **12v DC Female Jack** - with wire outlets. You can normally buy these with the Power Adapter<br><img src="images/12v%20jack.jpg" width="100"> 
-
-- **LM2596 Buck Converter** - to convert 12v down to 3.3v. Cost $1.50 each (normally in packs of 6-10)<br><img src="images/LM2596.png" width="100"> 
-
-- **ESP32**. You can use any ESP32. I'm using a NodeMCU compatible board. Mine cost $4 from Aliexpress<br><img src="images/nodemcu-esp32.png" width="100"> 
-
-
-## Wiring Diagram
-<img src="images/12v%20fan%20controller.png">
-
-Some important notes:
-- connect the fan PWM pin to a PWM GPIO
-- turn the knob on the buck converter with a screwdriver to make it output exactly 3.3v. You'll need a multimeter to measure that output.
-- ensure the 12v and 3.3v grounds are connected together.
-- the unused pin on the fan is the "Tach" pin. This could tell you the RPM of the fan. We won't use this instead opting to measure the input voltage we're sending to the fan.
-- you could easily skip the Buck converter and use two power sources 3.3v and 12v. 
-- the fritzing diagram shows a 4-pin DHT-11, when in fact I have the simpler 3-pin version as shown in the parts list. The 4-pin version might need a pullup resistor, haven't tried it.
-
-## Installing the software onto the ESP32
+## Installing the software onto the ESP8266
 
 ### Get this repo
 Clone this github repository.
@@ -73,7 +25,7 @@ From the command line cd into the directory
 
 Review the YAML file.
 
-Ensure the pins are set correctly for the PWM Fan (ledc) and the DHT-11.
+Ensure the pins are set correctly for the PWM Fan (D8) and the DHT-11 (D1).
 
 Review the instructions for [the ESPHome Climate Thermostat](https://esphome.io/components/climate/index.html), [ESPHome PID Climate Thermostat](https://esphome.io/components/climate/pid.html) and the [DHT-11 sensor](https://esphome.io/components/sensor/dht.html).
 
@@ -92,10 +44,12 @@ filters:
 Also note that my fans have a max power of 80% applied to the fans to control the noise. You might want to remove this maximum.
 
 ```yaml
-- platform: ledc
-  id: console_fan_speed
-  pin: 15
-  max_power: 80%
+- platform: esp8266_pwm
+    id: console_fan_speed
+    pin: D8
+    frequency: "25000 Hz" 
+    min_power: 13%
+    max_power: 80%
 ```
 
 ### Setup your wifi details
@@ -113,9 +67,9 @@ I prefer command-line on Mac:
 
 You could use the ESPHome that runs inside Home Assistant. 
 
-### Install to ESP32
+### Install to ESP8266
 
-Connect your ESP32 via USB to your computer, then upload the Firmware to the ESP32.
+Connect your ESP8266 via USB to your computer, then upload the Firmware to the ESP8266.
 
 `` esphome run console-fan.yaml``
 
@@ -164,7 +118,7 @@ Let's go through them section by section.
 
 <img src="images/primary-controls.jpg" width=400>
 
-By clicking the thermostat you can turn on/off the thermostat and fan and adjust the target temperature which will be persisted to flash on the ESP32.
+By clicking the thermostat you can turn on/off the thermostat and fan and adjust the target temperature which will be persisted to flash on the ESP8266.
 
 ```yaml
 type: entities
@@ -187,7 +141,7 @@ entities:
 
 - The Room and Outside temperatures are from other sensors in my house for reference.
 
-- The ``kp, ki and kd`` inputs are exposed from the device. Your ESP32 will be automatically receiving changes to these values to control the behavior of the PID controller. While you could tune these from the config.yaml it requires a compile, upload and reboot cycle each time. This is inconvenient and best to tweak in real-time. We want to expose these 3 parameters to a Home Assistant dashboard.
+- The ``kp, ki and kd`` inputs are exposed from the device. Your ESP8266 will be automatically receiving changes to these values to control the behavior of the PID controller. While you could tune these from the config.yaml it requires a compile, upload and reboot cycle each time. This is inconvenient and best to tweak in real-time. We want to expose these 3 parameters to a Home Assistant dashboard.
 
 ### The Graphs
 
@@ -219,7 +173,7 @@ cards:
 <img src="images/details.jpg" width=400>
 
 
-This Lovelace YAML exposes various sensors and switches from the ESP32.
+This Lovelace YAML exposes various sensors and switches from the ESP8266.
 
 ```yaml
 type: entities
@@ -230,12 +184,12 @@ entities:
   - entity: sensor.humidity
     name: console fan humidity
   - entity: switch.console_fan_autotune
-  - entity: switch.console_fan_esp32_restart
+  - entity: switch.console_fan_ESP8266_restart
 ```
 
 - ``console_fan_autotune`` is a switch which starts the [PID tuning](https://esphome.io/components/climate/pid.html#autotuning) process. I ended up abandoning this approach and manually tuning the PID.
 
-- ``console_fan_esp32_restart`` restarts the ESP32 remotely.
+- ``console_fan_ESP8266_restart`` restarts the ESP8266 remotely.
 
 ## Configuring the PID Parameters
 
