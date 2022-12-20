@@ -16,6 +16,8 @@ To build my DIY server cabinet thermostat-controlled fans, I used:
 I also hired someone to design a custom PCB with 3 fan headers and slots for each component, you can find it in /pcb folder and order it on JLCPCB for example. (Thanks shazmeter for letting me share your work !)
 
 <img src="images/custom-pcb.png" width=400>
+<img src="images/custom-pcb-2.png" width=400>
+<img src="images/custom-pcb-schema.png" height=400>
 
 ## Wiring Diagram
 <img src="images/12v%20fan%20controller.png">
