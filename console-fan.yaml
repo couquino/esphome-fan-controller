@@ -19,12 +19,18 @@ globals:
     initial_value: '0'
  
 #########################
-# ESP32 AND NETWORK SETUP
+# ESP8266 AND NETWORK SETUP
 
-esp32:
-  board: nodemcu-32s
-  framework:
-    type: arduino
+esp8266:
+  board: nodemcuv2
+
+manual_ip:
+  # Set this to the IP of the ESP
+  static_ip: 192.168.1.XX
+  # Set this to the IP address of the router. Often ends with .1
+  gateway: 192.168.1.1
+  # The subnet of the network. 255.255.255.0 works for most home networks.
+  subnet: 255.255.255.0
 
 # pid climate log update is noisy, dial it back to warn
 logger:
@@ -191,7 +197,7 @@ sensor:
 
   # GET TEMP/HUMIDITY FROM DHT11
   - platform: dht
-    pin: GPIO3
+    pin: D1
     temperature:
       name: "Temperature"
       id: console_fan_temperature
@@ -225,11 +231,11 @@ sensor:
     type: COOL
 
 output:
-  # Wire this pin (15) into the PWM pin of your 12v fan
-  # ledc is the name of the pwm output system on an esp32
-  - platform: ledc
+  # Wire this pin D8 into the PWM pin of your 12v fan
+  # We are using esp8266_pwm as the pwm output for the esp8266
+  - platform: esp8266_pwm
     id: console_fan_speed
-    pin: 15
+    pin: D8
 
     # 25KHz is standard PC fan frequency, minimises buzzing
     frequency: "25000 Hz" 
@@ -294,6 +300,6 @@ climate:
   
 
 switch:
-  # Expose an ESP32 restart button to HA
+  # Expose an ESP8266 restart button to HA
   - platform: restart
-    name: "Console Fan ESP32 Restart"
+    name: "Console Fan ESP8266 Restart"
