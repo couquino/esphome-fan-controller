@@ -13,7 +13,22 @@ To build my DIY server cabinet thermostat-controlled fans, I used:
 - 12v PWM 4-pin Computer Fan - I picked some [BioniX F140](https://www.arctic.de/en/BioniX-F140/ACFAN00096A) from Arctic but you can use any 12V PWM-controllable fan
 - DHT 11 temperature and humidity sensor
 
-I also hired someone to design a custom PCB with 3 fan headers and slots for each component, you can find it in /pcb folder and order it on JLCPCB for example.
+I also hired someone to design a custom PCB with 3 fan headers and slots for each component, you can find it in /pcb folder and order it on JLCPCB for example. (Thanks shazmeter for letting me share your work !)
+
+<img src="images/custom-pcb.png" width=400>
+
+## Wiring Diagram
+<img src="images/12v%20fan%20controller.png">
+
+Some important notes:
+- connect the fan PWM pin to a PWM GPIO
+- turn the knob on the buck converter with a screwdriver to make it output exactly 3.3v. You'll need a multimeter to measure that output.
+- ensure the 12v and 3.3v grounds are connected together.
+- the unused pin on the fan is the "Tach" pin. This could tell you the RPM of the fan. We won't use this instead opting to measure the input voltage we're sending to the fan.
+- you could easily skip the Buck converter and use two power sources 3.3v and 12v. 
+- the fritzing diagram shows a 4-pin DHT-11, when in fact I have the simpler 3-pin version as shown in the parts list. The 4-pin version might need a pullup resistor, haven't tried it.
+
+You can find the fritzing project in /fritzing-project folder
 
 ## Installing the software onto the ESP8266
 
